@@ -1,10 +1,11 @@
 #!/bin/bash
-# trap ctrl-c and call ctrl_c()
-trap ctrl_c INT
-
+# trap ctrl-c and continue
+# call this script with desired iperf command trailing
+# example ./myscript/perfmon.sh iperf -s
+trap ' ' INT
 mpstat -P ALL 1 > cpu.txt  &
 free -b -c 600000 -s 1 -w > mem.txt &
-sleep 3
+set -x; "$@" | tee iperf.txt ; set +x;
 kill $!
 kill $!
 sleep 2;
@@ -25,8 +26,9 @@ done
 gnuplot ./myscript/plotmem.gnu
 now=$(date +"%Y-%m-%d-%S")
 filename="cpu.$now.tar.gz"
-tar -czpmvf $filename cpu.txt mem.txt *.dat *.png 
+tar -czpmvf $filename cpu.txt mem.txt *.dat *.png iperf.txt
 rm cpu.txt;
 rm mem.txt;
+rm iperf.txt
 rm *.dat;
 rm *.png;
