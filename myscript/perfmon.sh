@@ -5,7 +5,7 @@
 trap ' ' INT
 mpstat -P ALL 1 > cpu.txt  &
 free -b -c 600000 -s 1 -w > mem.txt &
-set -x; "$@" | tee iperf.txt ; set +x;
+set -x; "$@" | tee command.txt ; set +x;
 kill $!
 kill $!
 sleep 2;
@@ -26,7 +26,7 @@ done
 gnuplot ./myscript/plotmem.gnu
 if [[ $@ = *"iperf3"* ]]; then
     $iperf="iperf.*";
-    ./myscript/parseram.pl < iperf.txt > iperf.dat
+    ./myscript/parseiperf.pl < command.txt > iperf.dat
     gnuplot ./myscript/plotiperf.gnu
 fi
 now=$(date +"%Y-%m-%d-%S")
@@ -35,9 +35,10 @@ read filename;
 if [[ $? != 1 ]]
 then
 filename="$filename.$now.tar.gz"
-tar -czpmvf $filename cpu.txt mem.txt *.dat *.png $iperf
+tar -czpmvf $filename cpu.txt mem.txt *.dat *.png command.txt  $iperf
 fi
 rm cpu.txt;
-rm mem.txt  $iperf;
+rm mem.txt;
+rm command.txt  $iperf;
 rm *.dat;
 rm *.png;
